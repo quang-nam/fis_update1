@@ -210,7 +210,7 @@ class FIS_PowerAllocation(nn.Module):
         # self.c = torch.tensor([+0.95, +0.60, +0.18, +0.35, +0.02, -0.35], dtype=torch.float32)
         # self.c = [+0.95, +0.60, +0.18, +0.35, +0.02, -0.35]
 #          r0     r1     r2     r3     r4     r5
-        self.c = nn.Parameter(torch.tensor([+0.95, +0.95, +0.95, +0.35, +0.02, -0.35]))
+        self.c = nn.Parameter(torch.tensor([+0.95, +0.60, +0.18, +0.35, +0.02, -0.35]))
     def _snr_unit(self, snr_db: float, device, dtype) -> torch.Tensor:
         s = (float(snr_db) - self.snr_min_db) / (self.snr_max_db - self.snr_min_db + self.eps)
         s = max(0.0, min(1.0, s))
@@ -409,28 +409,48 @@ class FIS_SpatialPowerController(nn.Module):
         mode = str(mode).lower()
 
         if mode == "snr_only":
-            # ── no_control diagnostic ──
-            # Block-fading: channel_rel là scalar (B,1,1,1) broadcast sang
-            # spatial map → A spatial-flat → power_normalize triệt tiêu hết.
-            # Không thể tạo "SNR-only global gain" trong kiến trúc hiện tại.
-            # Mode này = baseline reference, KHÔNG phải SNR-aware allocation.
-            I = torch.full((z.shape[0], z.shape[2], z.shape[3]), 0.5, device=z.device, dtype=z.dtype)
-            A = torch.ones((z.shape[0], z.shape[2], z.shape[3]), device=z.device, dtype=z.dtype)
-            if not return_info:
-                return A
-            a_stats = _summary_stats_map(A)
-            info["I"] = I
-            info["A"] = A
-            info["A_mean"] = a_stats["mean"]
-            info["A_std"] = a_stats["std"]
-            info["A_range"] = a_stats["range"]
-            info["A_min"] = a_stats["min"]
-            info["A_max"] = a_stats["max"]
-            info["I_A_corr"] = _safe_corr_2d(I, A, eps=self.eps)
-            info["snr_only_noop"] = torch.tensor(1.0, device=z.device, dtype=z.dtype)
-            if channel_rel is not None:
-                info["channel_rel"] = channel_rel
-            return A, info
+         # ── snr_only ablation: KHÔNG dùng content importance ──
+            # I = constant 0.5, nhưng VẪN chạy qua Layer-2 FIS với channel_rel.
+            # Dưới block-fading: channel_rel scalar → A spatial-uniform → ≈ baseline.
+            # Mục đích: chứng minh rằng channel context đơn thuần (không có I)
+            # không tạo được spatial differentiation.
+            I = torch.full(
+                (z.shape[0], z.shape[2], z.shape[3]),
+                0.5, device=z.device, dtype=z.dtype,
+            )
+
+            if return_info:
+                A, rid2, rs2, aux2 = self.pow(
+                    I, snr_db, budget=budget,
+                    channel_rel=channel_rel, return_rules=True,
+                )
+                a_stats = _summary_stats_map(A)
+                info.update({
+                    "I": I,
+                    "A": A,
+                    "A_mean": a_stats["mean"],
+                    "A_std": a_stats["std"],
+                    "A_range": a_stats["range"],
+                    "A_min": a_stats["min"],
+                    "A_max": a_stats["max"],
+                    "I_A_corr": _safe_corr_2d(I, A, eps=self.eps),
+                    "rule2_id": rid2,
+                    "rule2_strength": rs2,
+                    "rule2_balance_loss": self._rule_balance_loss(rs2, eps=self.eps),
+                    "score_map": aux2["score"],
+                    "delta_map": aux2["delta"],
+                    "channel_rel_map": aux2["channel_rel_map"],
+                    "channel_rel_mean": aux2["channel_rel_mean"],
+                })
+                if channel_rel is not None:
+                    info["channel_rel"] = channel_rel
+                return A, info
+
+            A = self.pow(
+                I, snr_db, budget=budget,
+                channel_rel=channel_rel, return_rules=False,
+            )
+            return A
         else:
             if return_info:
                 I, rid1, rs1 = self.imp(z, return_rules=True)

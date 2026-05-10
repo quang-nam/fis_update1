@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 # ================= CONFIG =================
 files = {
-    "AWGN": "/media/data/students/nguyenquangkhai/project1/JSCC_FIS/Deep-JSCC-PyTorch/paper_sims_awgn/paper_sims_results.json",
-    "Rayleigh_EQ": "/media/data/students/nguyenquangkhai/project1/JSCC_FIS/Deep-JSCC-PyTorch/paper_sims_eq/paper_sims_results.json",
-    "Rayleigh_noEQ": "/media/data/students/nguyenquangkhai/project1/JSCC_FIS/Deep-JSCC-PyTorch/paper_sims_noeq/paper_sims_results.json",
+    "AWGN": "/home/students/Documents/fisfinal/FIS_ENHANCE/paper_sims_awgn/paper_sims_results.json",
+    "Rayleigh_EQ": "/home/students/Documents/fisfinal/FIS_ENHANCE/paper_sims_eq/paper_sims_results.json",
+    "Rayleigh_noEQ": "/home/students/Documents/fisfinal/FIS_ENHANCE/paper_sims_noeq/paper_sims_results.json",
 }
 
 methods = ["baseline", "linear", "importance_only", "snr_only", "full"]

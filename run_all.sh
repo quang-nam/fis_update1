@@ -36,6 +36,7 @@ EVAL_SNR="1 4 7 10 13"
 BUDGET=1.0
 RATIO=0.1667
 BASE_DIR="exp_ctx"
+EPOCHS=100
 SNR_DB=1
 BASELINE_CKPT_NAME="baseline_best.pth"
 FIS_CKPT_NAME="fis_power_best.pth"

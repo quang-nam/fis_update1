@@ -82,7 +82,7 @@ def run_one_mode(model, x, snr_db, budget, mode, channel_ctx):
         snr_db=snr_db,
         budget=budget,
         mode=mode,
-        channel_rel=channel_ctx['gamma_eff_norm'],
+        channel_rel=channel_ctx['channel_rel'],
         return_info=True,
     )
     gain = A.clamp_min(model.eps)
