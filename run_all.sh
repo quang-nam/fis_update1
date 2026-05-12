@@ -36,7 +36,7 @@ EVAL_SNR="1 4 7 10 13"
 BUDGET=1.0
 RATIO=0.1667
 BASE_DIR="exp_ctx"
-EPOCHS=100
+EPOCHS=20
 SNR_DB=1
 BASELINE_CKPT_NAME="baseline_best.pth"
 FIS_CKPT_NAME="fis_power_best.pth"
@@ -100,11 +100,12 @@ run_baseline() {
     local SAVE_DIR="${BASE_DIR}/ckpts_${TAG}_baseline_${CHANNEL}${DIR_SUFFIX}"
 
     local CMD="python train_baseline.py \
-  --dataset ${DATASET} --image_size ${IMAGE_SIZE} \
-  --channel ${CHANNEL} \
-  --snr_min ${SNR_MIN} --snr_max ${SNR_MAX} \
-  --eval_snr_list ${EVAL_SNR} \
-  --save_dir ${SAVE_DIR} ${EXTRA_FLAG}"
+    --dataset ${DATASET} --image_size ${IMAGE_SIZE} \
+    --channel ${CHANNEL} \
+    --snr_min ${SNR_MIN} --snr_max ${SNR_MAX} \
+    --eval_snr_list ${EVAL_SNR} \
+    --epochs ${EPOCHS} \
+    --save_dir ${SAVE_DIR} ${EXTRA_FLAG}"
 
     echo ""
     echo "============================================================"
@@ -140,12 +141,13 @@ run_fis() {
         fi
     fi
 
-    local CMD="python train_fis_power.py \
-  --dataset ${DATASET} --image_size ${IMAGE_SIZE} \
-  --channel ${CHANNEL} --mode ${MODE} --budget ${BUDGET} \
-  --snr_min ${SNR_MIN} --snr_max ${SNR_MAX} \
-  --train_snr_list ${TRAIN_SNR} --eval_snr_list ${EVAL_SNR} \
-  --save_dir ${SAVE_DIR} ${WARMSTART_FLAG} ${EXTRA_FLAG}"
+        local CMD="python train_baseline.py \
+    --dataset ${DATASET} --image_size ${IMAGE_SIZE} \
+    --channel ${CHANNEL} \
+    --snr_min ${SNR_MIN} --snr_max ${SNR_MAX} \
+    --eval_snr_list ${EVAL_SNR} \
+    --epochs ${EPOCHS} \
+    --save_dir ${SAVE_DIR} ${EXTRA_FLAG}"
 
     echo ""
     echo "============================================================"

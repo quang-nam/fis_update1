@@ -293,8 +293,9 @@ class Channel(nn.Module):
                   # channel_rel = normalized |h|² (chỉ fading, KHÔNG chứa SNR)
                 # Điều này đảm bảo channel_rel phản ánh instantaneous fading
                 # severity chứ không lặp lại gamma_eff_norm.
-                h_abs2_db = 10.0 * torch.log10(h_abs2.clamp_min(self.eps))
-                channel_rel = self._norm_db(h_abs2_db)
+                channel_rel = gamma_eff_norm 
+                # h_abs2_db = 10.0 * torch.log10(h_abs2.clamp_min(self.eps))
+                # channel_rel = self._norm_db(h_abs2_db)
         else:
             channel_rel = gamma_eff_norm
 

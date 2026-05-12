@@ -150,7 +150,7 @@ def main():
                     choices=["cifar10", "celebahq", "folder"])
     ap.add_argument("--data_root", type=str, default="")
     ap.add_argument("--image_size", type=int, default=32)
-    ap.add_argument("--epochs", type=int, default=100)
+    ap.add_argument("--epochs", type=int, default=10)
     ap.add_argument("--batch_size", type=int, default=128)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--snr_min", type=float, default=0.0)
